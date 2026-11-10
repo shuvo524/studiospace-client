@@ -5,7 +5,6 @@ import {
   XIcon,
   YouTubeIcon,
 } from "@/components/brand/social-icons";
-import { CopyrightYear } from "@/components/layout/copyright-year";
 import { NewsletterForm } from "@/components/layout/newsletter-form";
 import { navLinks } from "@/lib/nav-links";
 
@@ -120,7 +119,7 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>
-            &copy; <CopyrightYear /> StudioSpace. All rights reserved.
+              &copy; 2026 StudioSpace. All rights reserved.
           </p>
           <p>
             By using StudioSpace you agree to our Terms of Use and Privacy
