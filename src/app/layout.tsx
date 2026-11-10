@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { Navbar } from "@/components/layout/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -36,14 +37,15 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${fontHeading.variable} ${fontBody.variable}`}
     >
-      <body className="min-h-screen bg-background text-foreground antialiased">
+      <body className="flex min-h-screen flex-col bg-background text-foreground antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
           enableSystem={false}
           storageKey="studiospace-theme"
         >
-          {children}
+          <Navbar />
+          <main className="flex-1">{children}</main>
           <Toaster richColors position="top-right" />
         </ThemeProvider>
       </body>
