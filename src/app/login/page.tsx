@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { AuthCard } from "@/components/auth/auth-card";
+import { GoogleButton } from "@/components/auth/google-button";
 import { LoginForm } from "@/components/auth/login-form";
 
 export const metadata: Metadata = {
@@ -26,7 +27,10 @@ export default function LoginPage() {
       }
     >
       <Suspense fallback={<div className="h-48" />}>
-        <LoginForm />
+        <div className="space-y-6">
+          <LoginForm />
+          <GoogleButton />
+        </div>
       </Suspense>
     </AuthCard>
   );
