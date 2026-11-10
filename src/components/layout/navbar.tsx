@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Building2,
   CalendarCheck,
@@ -33,6 +33,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { authClient } from "@/lib/auth-client";
 import { navLinks } from "@/lib/nav-links";
 
 const userMenu = [
@@ -44,15 +45,23 @@ const userMenu = [
 
 export function Navbar() {
   const pathname = usePathname();
-  const { user } = useCurrentUser();
+  const router = useRouter();
+  const { user, isPending } = useCurrentUser();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
-  const handleLogout = () => {
-    // Real logout will be connected when we set up BetterAuth.
-    toast.info("Logout will work after we set up login.");
+  const handleLogout = async () => {
+    const { error } = await authClient.signOut();
+    if (error) {
+      toast.error("Could not log out. Please try again.");
+      return;
+    }
+    setMobileOpen(false);
+    toast.success("You have been logged out.");
+    router.push("/");
+    router.refresh();
   };
 
   const initials = user?.name
@@ -96,7 +105,12 @@ export function Navbar() {
         <div className="flex items-center gap-1 sm:gap-2">
           <ThemeToggle />
 
-          {user ? (
+          {isPending ? (
+            <div
+              aria-hidden="true"
+              className="size-10 animate-pulse rounded-full bg-muted"
+            />
+          ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -142,7 +156,7 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             <div className="hidden items-center gap-2 sm:flex">
-              <Button asChild variant="ghost">
+              <Button asChild variant="outline">
                 <Link href="/login">Login</Link>
               </Button>
               <Button asChild>
@@ -192,7 +206,32 @@ export function Navbar() {
                     </Link>
                   );
                 })}
-                {!user && (
+
+                {user && (
+                  <div className="mt-4 grid gap-1 border-t border-border pt-4">
+                    {userMenu.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
+                      >
+                        <item.icon className="size-4" />
+                        {item.label}
+                      </Link>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="flex items-center gap-3 rounded-lg px-4 py-3 text-left text-base font-medium text-destructive transition-colors hover:bg-accent/60"
+                    >
+                      <LogOut className="size-4" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+
+                {!isPending && !user && (
                   <div className="mt-4 grid gap-2 border-t border-border pt-4">
                     <Button asChild variant="outline" size="lg">
                       <Link href="/login" onClick={() => setMobileOpen(false)}>
