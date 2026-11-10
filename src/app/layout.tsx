@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { TokenSync } from "@/components/auth/token-sync";
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -45,6 +46,7 @@ export default function RootLayout({
           enableSystem={false}
           storageKey="studiospace-theme"
         >
+          <TokenSync />
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />

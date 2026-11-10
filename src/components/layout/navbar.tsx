@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/sheet";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { authClient } from "@/lib/auth-client";
+import { clearBackendToken } from "@/lib/backend-token";
 import { navLinks } from "@/lib/nav-links";
 
 const userMenu = [
@@ -53,6 +54,7 @@ export function Navbar() {
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   const handleLogout = async () => {
+    await clearBackendToken();
     const { error } = await authClient.signOut();
     if (error) {
       toast.error("Could not log out. Please try again.");
