@@ -2,7 +2,7 @@
 
 StudioSpace is a peer-to-peer marketplace where creators book photo studios, film stages, podcast lounges, music suites and art workshops by the hour — directly from the people who run them. Hosts list their spaces, creators discover and reserve them with transparent pricing and real-time booking management.
 
-**Live Site:** ADD-YOUR-DEPLOYED-URL-HERE (replace this with the live Vercel URL after deployment)
+**Live Site:** https://studiospace-booking.vercel.app
 **Server Repository:** https://github.com/shuvo524/studiospace-server
 
 ## Features
@@ -89,7 +89,7 @@ Optional: fill the database with 10 demo studios (2 per category) by running
 Use this demo account to review the private features (booking, listings, wishlist):
 
 - **Email:** test@example.com
-- **Password:** ADD-THE-DEMO-ACCOUNT-PASSWORD-HERE
+- **Password:** J9HNXVfF4RB7PMs
 
 ## Challenges Implemented
 
