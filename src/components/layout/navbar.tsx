@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -44,7 +45,7 @@ const userMenu = [
   { label: "My Bookings", href: "/my-bookings", icon: CalendarCheck },
 ];
 
-export function Navbar() {
+function NavbarContent() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isPending } = useCurrentUser();
@@ -256,5 +257,16 @@ export function Navbar() {
         </div>
       </div>
     </header>
+  );
+}
+export function Navbar() {
+  return (
+    <Suspense
+      fallback={
+        <header className="sticky top-0 z-50 h-16 w-full border-b border-border bg-background" />
+      }
+    >
+      <NavbarContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,10 @@
 import { Suspense } from "react";
+import { BrowseCategories } from "@/components/home/browse-categories";
 import { FeaturedStudios } from "@/components/home/featured-studios";
 import { HeroSlider } from "@/components/home/hero-slider";
+import { HostGuarantee } from "@/components/home/host-guarantee";
+import { HowBookingWorks } from "@/components/home/how-booking-works";
+import { WishlistProvider } from "@/components/wishlist/wishlist-provider";
 
 function HeroFallback() {
   return (
@@ -14,7 +18,12 @@ export default function HomePage() {
       <Suspense fallback={<HeroFallback />}>
         <HeroSlider />
       </Suspense>
-      <FeaturedStudios />
+      <BrowseCategories />
+      <WishlistProvider>
+        <FeaturedStudios />
+      </WishlistProvider>
+      <HowBookingWorks />
+      <HostGuarantee />
     </>
   );
 }

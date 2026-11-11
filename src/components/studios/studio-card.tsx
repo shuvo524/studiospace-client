@@ -3,13 +3,16 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState } from "react";
 import Link from "next/link";
-import { Aperture, MapPin, Star } from "lucide-react";
+import { Aperture, Heart, MapPin, Star } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { useWishlist } from "@/components/wishlist/wishlist-provider";
 import { cn } from "@/lib/utils";
 import type { Studio } from "@/types/studio";
 
 export function StudioCard({ studio }: { studio: Studio }) {
   const [imageFailed, setImageFailed] = useState(false);
+  const { ids, toggle } = useWishlist();
+  const saved = ids.has(studio._id);
   const hasReviews = studio.reviewCount > 0;
 
   return (
@@ -34,6 +37,17 @@ export function StudioCard({ studio }: { studio: Studio }) {
           <Star className="size-3 fill-current" />
           {hasReviews ? studio.rating.toFixed(1) : "New"}
         </span>
+        <button
+          type="button"
+          aria-label={saved ? "Remove from wishlist" : "Save to wishlist"}
+          aria-pressed={saved}
+          onClick={() => void toggle(studio._id)}
+          className="absolute bottom-3 right-3 flex size-9 items-center justify-center rounded-full bg-background/90 text-foreground shadow transition hover:scale-110"
+        >
+          <Heart
+            className={cn("size-4", saved && "fill-red-500 text-red-500")}
+          />
+        </button>
       </div>
 
       <div className="flex flex-1 flex-col p-5">
