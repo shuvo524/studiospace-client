@@ -17,6 +17,7 @@ export interface Studio {
   maxCapacity: number;
   location: string;
   imageUrl: string;
+  gallery?: string[];
   amenities: string[];
   overview: string;
   ownerEmail: string;

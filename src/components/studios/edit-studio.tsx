@@ -106,6 +106,7 @@ export function EditStudio({ studioId }: { studioId: string }) {
     maxCapacity: String(studio.maxCapacity),
     location: studio.location,
     imageUrl: studio.imageUrl,
+    gallery: studio.gallery ?? [],
     amenities: studio.amenities ?? [],
     overview: studio.overview,
   };

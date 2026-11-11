@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { GalleryField } from "@/components/studios/gallery-field";
 import {
   Select,
   SelectContent,
@@ -30,6 +31,7 @@ export interface StudioFormValues {
   maxCapacity: string;
   location: string;
   imageUrl: string;
+  gallery: string[];
   amenities: string[];
   overview: string;
 }
@@ -42,6 +44,7 @@ const emptyValues: StudioFormValues = {
   maxCapacity: "",
   location: "",
   imageUrl: "",
+  gallery: [],
   amenities: [],
   overview: "",
 };
@@ -195,6 +198,7 @@ export function StudioForm({
       maxCapacity: Number(values.maxCapacity),
       location: values.location.trim(),
       imageUrl: values.imageUrl.trim(),
+      gallery: values.gallery,
       amenities: values.amenities,
       overview: values.overview.trim(),
     };
@@ -409,7 +413,11 @@ export function StudioForm({
           </div>
         )}
       </div>
-
+      {/* More photos */}
+      <GalleryField
+        value={values.gallery}
+        onChange={(next) => setField("gallery", next)}
+      />
       {/* Amenities */}
       <div className="space-y-3">
         <Label>Amenities</Label>
