@@ -20,6 +20,7 @@ export interface Studio {
   gallery?: string[];
   amenities: string[];
   overview: string;
+  cancellationPolicy?: string;
   ownerEmail: string;
   ownerName: string;
   rating: number;

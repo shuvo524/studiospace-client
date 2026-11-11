@@ -4,7 +4,7 @@ import { BookingRequests } from "@/components/bookings/booking-requests";
 import { PageHeader } from "@/components/shared/page-header";
 
 export const metadata: Metadata = {
-  title: "Booking Requests | StudioSpace",
+  title: "Booking Requests",
 };
 
 export default function BookingRequestsPage() {

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { StudioDetails } from "@/components/studios/studio-details";
 
 export const metadata: Metadata = {
-  title: "Studio Details | StudioSpace",
+  title: "Studio Details",
 };
 
 async function DetailsContent({

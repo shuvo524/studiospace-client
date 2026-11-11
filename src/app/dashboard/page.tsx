@@ -3,7 +3,7 @@ import { RequireAuth } from "@/components/auth/require-auth";
 import { DashboardHub } from "@/components/dashboard/dashboard-hub";
 
 export const metadata: Metadata = {
-  title: "Dashboard | StudioSpace",
+  title: "Dashboard",
 };
 
 export default function DashboardPage() {

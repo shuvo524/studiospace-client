@@ -20,12 +20,30 @@ const fontBody = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "http://localhost:3000",
+  ),
   title: {
     default: "StudioSpace | Book Creative Studios by the Hour",
     template: "%s | StudioSpace",
   },
   description:
     "StudioSpace is a peer-to-peer marketplace where creators book photo studios, film stages, podcast lounges and music suites by the hour.",
+  openGraph: {
+    title: "StudioSpace | Book Creative Studios by the Hour",
+    description:
+      "Book photo studios, film stages, podcast lounges and music suites by the hour, straight from the people who run them.",
+    siteName: "StudioSpace",
+    type: "website",
+    images: ["/images/hero-photo.jpg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "StudioSpace | Book Creative Studios by the Hour",
+    description:
+      "Book photo studios, film stages, podcast lounges and music suites by the hour, straight from the people who run them.",
+    images: ["/images/hero-photo.jpg"],
+  },
 };
 
 export default function RootLayout({

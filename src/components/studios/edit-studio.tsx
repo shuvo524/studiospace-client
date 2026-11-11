@@ -109,6 +109,9 @@ export function EditStudio({ studioId }: { studioId: string }) {
     gallery: studio.gallery ?? [],
     amenities: studio.amenities ?? [],
     overview: studio.overview,
+    cancellationPolicy:
+      studio.cancellationPolicy ??
+      "Flexible — free cancellation up to 24 hours before the session",
   };
 
   return (

@@ -1,0 +1,931 @@
+diff --git a/README.md b/README.md
+index e215bc4..34e9717 100644
+--- a/README.md
++++ b/README.md
+@@ -1,36 +1,98 @@
+-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
++# StudioSpace — Book Creative Studios by the Hour
+ 
+-## Getting Started
++StudioSpace is a peer-to-peer marketplace where creators book photo studios, film stages, podcast lounges, music suites and art workshops by the hour — directly from the people who run them. Hosts list their spaces, creators discover and reserve them with transparent pricing and real-time booking management.
+ 
+-First, run the development server:
++**Live Site:** ADD-YOUR-DEPLOYED-URL-HERE (replace this with the live Vercel URL after deployment)
++**Server Repository:** https://github.com/shuvo524/studiospace-server
++
++## Features
++
++- **Dynamic studio marketplace** — all studios are fetched live from MongoDB; the home page shows 6 featured (top-rated / newest) studios with image, category, location, cancellation policy, hourly price, rating and a "View Studio" button.
++- **Full studio details pages** (`/studios/:id`) with photo gallery, amenities, host details, reviews and a Book Now flow.
++- **Real booking system** (`/add-booking/:studioId`) with a date picker and a 15-minute time-slot grid (8:00 AM – 11:00 PM), live total-price calculation, double-booking prevention on the server, booking requests, host approvals and cancellations.
++- **Explore with search, filters and sorting** (`/studios`, also at `/all-studios`) — search by title, location, category or amenity; filter by category, hourly rate and capacity; sort by price or rating.
++- **Complete host CRUD** — add a studio (`/add-studio`) with imgbb image upload and multi-photo gallery, manage listings (`/my-listings`) with an update page and delete confirmation dialog, and track bookings (`/my-bookings`).
++- **Authentication & security** — BetterAuth (email/password + Google) with password rules, JWT API protection using HTTP-only cookies, and private routes for all dashboard pages.
++- **Saved Studios wishlist** — heart any studio card and find it later on the Wishlist page, stored per user in MongoDB.
++- **PDF booking invoices** — download a printable invoice for every booking.
++- **Polished UX** — light/dark theme toggle, Sonner toast notifications, branded skeleton loaders, a custom 404 page, and a fully responsive design.
++
++## Tech Stack
++
++- **FrontEnd:** Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui components, Swiper, Sonner
++- **BackEnd:** Express.js, TypeScript, MongoDB (native driver)
++- **Authentication & Authorization:** BetterAuth (MongoDB adapter), JWT in HTTP-only cookies
++- **Image Hosting:** imgbb
++- **Deployment:** Vercel (client) / Render (server)
++
++## Main Routes
++
++| Route | Description |
++| --- | --- |
++| `/` | Home with hero slider, featured studios and more |
++| `/studios` / `/all-studios` | Explore all studios with search, filters and sort |
++| `/studios/:id` | Studio details, gallery, reviews, host info |
++| `/add-booking/:studioId` | Book a studio (private) |
++| `/add-studio` | Add a new studio listing (private) |
++| `/my-listings` | My studio listings — update / delete (private) |
++| `/my-bookings` | My bookings — cancel, invoice (private) |
++| `/dashboard` | Dashboard hub with booking requests (private) |
++| `/wishlist` | Saved studios (private) |
++| `/login`, `/register` | Email/password or Google sign-in |
++
++## Local Setup
++
++### Client
+ 
+ ```bash
++git clone https://github.com/shuvo524/studiospace-client.git
++cd studiospace-client
++npm install
+ npm run dev
+-# or
+-yarn dev
+-# or
+-pnpm dev
+-# or
+-bun dev
+ ```
+ 
+-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
++Create a `.env.local` file in the client root:
+ 
+-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
++```env
++MONGODB_URI=your_mongodb_connection_string
++BACKEND_URL=http://localhost:5000
++GOOGLE_CLIENT_ID=your_google_client_id
++GOOGLE_CLIENT_SECRET=your_google_client_secret
++IMGBB_API_KEY=your_imgbb_api_key
++INTERNAL_API_KEY=a_shared_secret_matching_the_server
++```
+ 
+-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
++### Server
+ 
+-## Learn More
++```bash
++git clone https://github.com/shuvo524/studiospace-server.git
++cd studiospace-server
++npm install
++npm run dev
++```
++
++Create a `.env` file in the server root:
++
++```env
++PORT=5000
++DATABASE_URI=your_mongodb_connection_string
++CLIENT_URL=http://localhost:3000
++JWT_SECRET=your_jwt_secret
++INTERNAL_API_KEY=a_shared_secret_matching_the_client
++```
+ 
+-To learn more about Next.js, take a look at the following resources:
++Optional: fill the database with 10 demo studios (2 per category) by running
++`npm run seed` in the server folder.
+ 
+-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
++## Examiner Test Credentials
+ 
+-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
++Use this demo account to review the private features (booking, listings, wishlist):
+ 
+-## Deploy on Vercel
++- **Email:** test@example.com
++- **Password:** ADD-THE-DEMO-ACCOUNT-PASSWORD-HERE
+ 
+-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
++## Challenges Implemented
+ 
+-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
++- **JWT security with HTTP-only cookies** — all server mutations reject unauthenticated requests with 401.
++- **Double-booking prevention** — new bookings are checked for time overlap against confirmed bookings and rejected with a clear message.
++- **Theme customization** — one-click light/dark theme toggle across the whole site.
+diff --git a/src/app/about/page.tsx b/src/app/about/page.tsx
+index 0da85cb..f1678f7 100644
+--- a/src/app/about/page.tsx
++++ b/src/app/about/page.tsx
+@@ -6,7 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
+ import { cn } from "@/lib/utils";
+ 
+ export const metadata: Metadata = {
+-  title: "About Us | StudioSpace",
++  title: "About Us",
+ };
+ 
+ const values = [
+diff --git a/src/app/add-booking/[studioId]/page.tsx b/src/app/add-booking/[studioId]/page.tsx
+new file mode 100644
+index 0000000..4a966c9
+--- /dev/null
++++ b/src/app/add-booking/[studioId]/page.tsx
+@@ -0,0 +1,45 @@
++import type { Metadata } from "next";
++import { Suspense } from "react";
++import { RequireAuth } from "@/components/auth/require-auth";
++import { PageHeader } from "@/components/shared/page-header";
++import { BookingPage } from "@/components/studios/booking-page";
++
++export const metadata: Metadata = {
++  title: "Book a Studio",
++};
++
++async function BookingContent({
++  params,
++}: {
++  params: Promise<{ studioId: string }>;
++}) {
++  const { studioId } = await params;
++  return <BookingPage studioId={studioId} />;
++}
++
++export default function AddBookingPage({
++  params,
++}: {
++  params: Promise<{ studioId: string }>;
++}) {
++  return (
++    <RequireAuth>
++      <section className="py-12 sm:py-16">
++        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
++          <PageHeader
++            eyebrow="Book a Studio"
++            title="Reserve your session"
++            description="Pick a date, choose your time slots, and see the total price before you confirm."
++          />
++          <Suspense
++            fallback={
++              <div className="h-96 animate-pulse rounded-2xl bg-muted" />
++            }
++          >
++            <BookingContent params={params} />
++          </Suspense>
++        </div>
++      </section>
++    </RequireAuth>
++  );
++}
+diff --git a/src/app/add-studio/page.tsx b/src/app/add-studio/page.tsx
+index ba67ca8..88f555f 100644
+--- a/src/app/add-studio/page.tsx
++++ b/src/app/add-studio/page.tsx
+@@ -3,7 +3,7 @@ import { RequireAuth } from "@/components/auth/require-auth";
+ import { StudioForm } from "@/components/studios/studio-form";
+ 
+ export const metadata: Metadata = {
+-  title: "Add New Studio | StudioSpace",
++  title: "Add New Studio",
+ };
+ 
+ export default function AddStudioPage() {
+diff --git a/src/app/all-studios/page.tsx b/src/app/all-studios/page.tsx
+new file mode 100644
+index 0000000..07404d9
+--- /dev/null
++++ b/src/app/all-studios/page.tsx
+@@ -0,0 +1,34 @@
++import type { Metadata } from "next";
++import { Suspense } from "react";
++import { PageHeader } from "@/components/shared/page-header";
++import { ExploreStudios } from "@/components/studios/explore-studios";
++import { StudioCardSkeleton } from "@/components/studios/studio-card-skeleton";
++
++export const metadata: Metadata = {
++  title: "All Studios",
++};
++
++export default function AllStudiosPage() {
++  return (
++    <section className="py-12 sm:py-16">
++      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
++        <PageHeader
++          eyebrow="All Studios"
++          title="Every creative space, in one place"
++          description="Search photo studios, film stages, podcast lounges, music suites and workshops, then filter and sort to find your fit."
++        />
++        <Suspense
++          fallback={
++            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
++              {Array.from({ length: 6 }).map((_, index) => (
++                <StudioCardSkeleton key={index} />
++              ))}
++            </div>
++          }
++        >
++          <ExploreStudios />
++        </Suspense>
++      </div>
++    </section>
++  );
++}
+diff --git a/src/app/dashboard/page.tsx b/src/app/dashboard/page.tsx
+index cba57f8..b60c913 100644
+--- a/src/app/dashboard/page.tsx
++++ b/src/app/dashboard/page.tsx
+@@ -3,7 +3,7 @@ import { RequireAuth } from "@/components/auth/require-auth";
+ import { DashboardHub } from "@/components/dashboard/dashboard-hub";
+ 
+ export const metadata: Metadata = {
+-  title: "Dashboard | StudioSpace",
++  title: "Dashboard",
+ };
+ 
+ export default function DashboardPage() {
+diff --git a/src/app/dashboard/requests/page.tsx b/src/app/dashboard/requests/page.tsx
+index 1dfabcc..0fca766 100644
+--- a/src/app/dashboard/requests/page.tsx
++++ b/src/app/dashboard/requests/page.tsx
+@@ -4,7 +4,7 @@ import { BookingRequests } from "@/components/bookings/booking-requests";
+ import { PageHeader } from "@/components/shared/page-header";
+ 
+ export const metadata: Metadata = {
+-  title: "Booking Requests | StudioSpace",
++  title: "Booking Requests",
+ };
+ 
+ export default function BookingRequestsPage() {
+diff --git a/src/app/how-it-works/page.tsx b/src/app/how-it-works/page.tsx
+index c961633..1a72a44 100644
+--- a/src/app/how-it-works/page.tsx
++++ b/src/app/how-it-works/page.tsx
+@@ -7,7 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
+ import { cn } from "@/lib/utils";
+ 
+ export const metadata: Metadata = {
+-  title: "How It Works | StudioSpace",
++  title: "How It Works",
+ };
+ 
+ const hostSteps = [
+diff --git a/src/app/layout.tsx b/src/app/layout.tsx
+index f879268..267c3e0 100644
+--- a/src/app/layout.tsx
++++ b/src/app/layout.tsx
+@@ -20,12 +20,30 @@ const fontBody = Plus_Jakarta_Sans({
+ });
+ 
+ export const metadata: Metadata = {
++  metadataBase: new URL(
++    process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "http://localhost:3000",
++  ),
+   title: {
+     default: "StudioSpace | Book Creative Studios by the Hour",
+     template: "%s | StudioSpace",
+   },
+   description:
+     "StudioSpace is a peer-to-peer marketplace where creators book photo studios, film stages, podcast lounges and music suites by the hour.",
++  openGraph: {
++    title: "StudioSpace | Book Creative Studios by the Hour",
++    description:
++      "Book photo studios, film stages, podcast lounges and music suites by the hour, straight from the people who run them.",
++    siteName: "StudioSpace",
++    type: "website",
++    images: ["/images/hero-photo.jpg"],
++  },
++  twitter: {
++    card: "summary_large_image",
++    title: "StudioSpace | Book Creative Studios by the Hour",
++    description:
++      "Book photo studios, film stages, podcast lounges and music suites by the hour, straight from the people who run them.",
++    images: ["/images/hero-photo.jpg"],
++  },
+ };
+ 
+ export default function RootLayout({
+diff --git a/src/app/my-bookings/page.tsx b/src/app/my-bookings/page.tsx
+index 4ab721a..9a88a8d 100644
+--- a/src/app/my-bookings/page.tsx
++++ b/src/app/my-bookings/page.tsx
+@@ -4,7 +4,7 @@ import { MyBookings } from "@/components/bookings/my-bookings";
+ import { PageHeader } from "@/components/shared/page-header";
+ 
+ export const metadata: Metadata = {
+-  title: "My Bookings | StudioSpace",
++  title: "My Bookings",
+ };
+ 
+ export default function MyBookingsPage() {
+diff --git a/src/app/my-listings/page.tsx b/src/app/my-listings/page.tsx
+index 251e875..a2641b4 100644
+--- a/src/app/my-listings/page.tsx
++++ b/src/app/my-listings/page.tsx
+@@ -3,7 +3,7 @@ import { RequireAuth } from "@/components/auth/require-auth";
+ import { MyListings } from "@/components/listings/my-listings";
+ 
+ export const metadata: Metadata = {
+-  title: "My Studio Listings | StudioSpace",
++  title: "My Studio Listings",
+ };
+ 
+ export default function MyListingsPage() {
+diff --git a/src/components/studios/[id]/page.tsx b/src/app/studios/[id]/page.tsx
+similarity index 94%
+rename from src/components/studios/[id]/page.tsx
+rename to src/app/studios/[id]/page.tsx
+index 1d0d76a..1ca991f 100644
+--- a/src/components/studios/[id]/page.tsx
++++ b/src/app/studios/[id]/page.tsx
+@@ -3,7 +3,7 @@ import { Suspense } from "react";
+ import { StudioDetails } from "@/components/studios/studio-details";
+ 
+ export const metadata: Metadata = {
+-  title: "Studio Details | StudioSpace",
++  title: "Studio Details",
+ };
+ 
+ async function DetailsContent({
+@@ -33,4 +33,4 @@ export default function StudioDetailsPage({
+       </div>
+     </section>
+   );
+-}
+\ No newline at end of file
++}
+diff --git a/src/app/studios/edit/[id]/page.tsx b/src/app/studios/edit/[id]/page.tsx
+index 6a99920..7d70a68 100644
+--- a/src/app/studios/edit/[id]/page.tsx
++++ b/src/app/studios/edit/[id]/page.tsx
+@@ -5,7 +5,7 @@ import { RequireAuth } from "@/components/auth/require-auth";
+ import { EditStudio } from "@/components/studios/edit-studio";
+ 
+ export const metadata: Metadata = {
+-  title: "Update Studio | StudioSpace",
++  title: "Update Studio",
+ };
+ 
+ function GuardFallback() {
+diff --git a/src/app/studios/page.tsx b/src/app/studios/page.tsx
+index 341f97f..0112ea2 100644
+--- a/src/app/studios/page.tsx
++++ b/src/app/studios/page.tsx
+@@ -5,7 +5,7 @@ import { ExploreStudios } from "@/components/studios/explore-studios";
+ import { StudioCardSkeleton } from "@/components/studios/studio-card-skeleton";
+ 
+ export const metadata: Metadata = {
+-  title: "Explore Studios | StudioSpace",
++  title: "Explore Studios",
+ };
+ 
+ export default function StudiosPage() {
+diff --git a/src/app/wishlist/page.tsx b/src/app/wishlist/page.tsx
+index a531f4d..c271873 100644
+--- a/src/app/wishlist/page.tsx
++++ b/src/app/wishlist/page.tsx
+@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/shared/page-header";
+ import { SavedStudios } from "@/components/wishlist/saved-studios";
+ 
+ export const metadata: Metadata = {
+-  title: "Saved Studios | StudioSpace",
++  title: "Saved Studios",
+ };
+ 
+ export default function WishlistPage() {
+diff --git a/src/components/studios/booking-page.tsx b/src/components/studios/booking-page.tsx
+new file mode 100644
+index 0000000..59d6ce3
+--- /dev/null
++++ b/src/components/studios/booking-page.tsx
+@@ -0,0 +1,318 @@
++"use client";
++
++/* eslint-disable @next/next/no-img-element */
++import { useEffect, useMemo, useState } from "react";
++import Link from "next/link";
++import { useRouter } from "next/navigation";
++import { CalendarDays, Clock, Loader2, MapPin, Star, Users } from "lucide-react";
++import { toast } from "sonner";
++import { Button, buttonVariants } from "@/components/ui/button";
++import { Input } from "@/components/ui/input";
++import { Label } from "@/components/ui/label";
++import { api } from "@/lib/api";
++import { authApi } from "@/lib/auth-api";
++import { formatMoney } from "@/lib/format";
++import { cn } from "@/lib/utils";
++import type { Studio } from "@/types/studio";
++
++// Studio hours: 8:00 AM - 11:00 PM, in 15-minute steps.
++const OPEN_MINUTES = 8 * 60;
++const CLOSE_MINUTES = 23 * 60;
++const STEP = 15;
++
++const SLOTS: number[] = [];
++for (let m = OPEN_MINUTES; m < CLOSE_MINUTES; m += STEP) {
++  SLOTS.push(m);
++}
++
++function toHHMM(minutes: number): string {
++  const h = Math.floor(minutes / 60);
++  const m = minutes % 60;
++  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
++}
++
++function toLabel(minutes: number): string {
++  const h24 = Math.floor(minutes / 60);
++  const m = minutes % 60;
++  const period = h24 >= 12 ? "PM" : "AM";
++  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
++  return `${h12}:${String(m).padStart(2, "0")} ${period}`;
++}
++
++function todayString(): string {
++  const now = new Date();
++  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
++    now.getDate(),
++  ).padStart(2, "0")}`;
++}
++
++export function BookingPage({ studioId }: { studioId: string }) {
++  const router = useRouter();
++  const [studio, setStudio] = useState<Studio | null>(null);
++  const [loadError, setLoadError] = useState<string | null>(null);
++  const [date, setDate] = useState("");
++  const [start, setStart] = useState<number | null>(null);
++  const [end, setEnd] = useState<number | null>(null);
++  const [error, setError] = useState<string | null>(null);
++  const [submitting, setSubmitting] = useState(false);
++
++  useEffect(() => {
++    let ignore = false;
++    api<Studio>(`/api/studios/${studioId}`)
++      .then((data) => {
++        if (!ignore) setStudio(data);
++      })
++      .catch(() => {
++        if (!ignore) {
++          setLoadError("We could not load this studio. It may have been removed.");
++        }
++      });
++    return () => {
++      ignore = true;
++    };
++  }, [studioId]);
++
++  const hours = useMemo(() => {
++    if (start === null || end === null || end <= start) return 0;
++    return (end - start) / 60;
++  }, [start, end]);
++
++  const total = studio ? Math.round(hours * studio.hourlyRate * 100) / 100 : 0;
++
++  function handleSlotClick(minutes: number) {
++    setError(null);
++    if (start === null || (start !== null && end !== null)) {
++      setStart(minutes);
++      setEnd(null);
++      return;
++    }
++    if (minutes > start) {
++      setEnd(minutes);
++    } else {
++      setStart(minutes);
++      setEnd(null);
++    }
++  }
++
++  function slotState(minutes: number): "start" | "end" | "in-range" | "idle" {
++    if (start !== null && minutes === start) return "start";
++    if (end !== null && minutes === end) return "end";
++    if (start !== null && end !== null && minutes > start && minutes < end) {
++      return "in-range";
++    }
++    return "idle";
++  }
++
++  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
++    event.preventDefault();
++    setError(null);
++
++    if (!studio) return;
++
++    if (!date) {
++      setError("Please choose a booking date.");
++      return;
++    }
++    if (date < todayString()) {
++      setError("You cannot book a date in the past.");
++      return;
++    }
++    if (start === null || end === null || hours <= 0) {
++      setError("Please pick a start and an end time from the slot grid.");
++      return;
++    }
++
++    setSubmitting(true);
++    try {
++      await authApi("/api/bookings", {
++        method: "POST",
++        body: JSON.stringify({
++          studioId: studio._id,
++          date,
++          startTime: toHHMM(start),
++          endTime: toHHMM(end),
++        }),
++      });
++      toast.success("Booking request sent. The host will confirm shortly.");
++      router.push("/my-bookings");
++    } catch (err) {
++      const message =
++        err instanceof Error
++          ? err.message
++          : "Could not create your booking. Please try again.";
++      setError(message);
++      toast.error(message);
++      setSubmitting(false);
++    }
++  }
++
++  if (loadError) {
++    return (
++      <div className="mx-auto max-w-md rounded-2xl border border-border bg-card p-8 text-center">
++        <p className="font-medium">Studio not available</p>
++        <p className="mt-2 text-sm text-muted-foreground">{loadError}</p>
++        <Link
++          href="/studios"
++          className={cn(buttonVariants({ size: "sm" }), "mt-5")}
++        >
++          Browse studios
++        </Link>
++      </div>
++    );
++  }
++
++  if (!studio) {
++    return (
++      <div className="space-y-6">
++        <div className="h-56 animate-pulse rounded-2xl bg-muted" />
++        <div className="h-72 animate-pulse rounded-2xl bg-muted" />
++      </div>
++    );
++  }
++
++  return (
++    <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
++      <form onSubmit={handleSubmit} noValidate className="space-y-8">
++        <div className="space-y-3">
++          <Label htmlFor="booking-date" className="inline-flex items-center gap-2">
++            <CalendarDays className="size-4" /> Booking date
++          </Label>
++          <Input
++            id="booking-date"
++            type="date"
++            min={todayString()}
++            value={date}
++            onChange={(event) => {
++              setDate(event.target.value);
++              setError(null);
++            }}
++            className="max-w-xs dark:scheme-dark"
++          />
++        </div>
++
++        <div className="space-y-3">
++          <p className="inline-flex items-center gap-2 text-sm font-medium">
++            <Clock className="size-4" /> Choose your time slots
++          </p>
++          <p className="text-sm text-muted-foreground">
++            Tap a slot to set your start time, then tap a later slot to set
++            your end time. Slots run every 15 minutes, from 8:00 AM to
++            11:00 PM.
++          </p>
++          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8">
++            {SLOTS.map((minutes) => {
++              const state = slotState(minutes);
++              return (
++                <button
++                  key={minutes}
++                  type="button"
++                  onClick={() => handleSlotClick(minutes)}
++                  aria-pressed={state === "start" || state === "end"}
++                  className={cn(
++                    "rounded-lg border px-1 py-2 text-xs font-medium transition",
++                    state === "idle" &&
++                      "border-border bg-card hover:border-primary hover:text-primary",
++                    state === "in-range" && "border-primary/40 bg-primary/10",
++                    (state === "start" || state === "end") &&
++                      "border-primary bg-primary text-primary-foreground",
++                  )}
++                >
++                  {toLabel(minutes)}
++                </button>
++              );
++            })}
++          </div>
++          <p className="text-sm text-muted-foreground" aria-live="polite">
++            {start !== null ? (
++              <>
++                Selected: <span className="font-medium text-foreground">{toLabel(start)}</span>
++                {end !== null ? (
++                  <>
++                    {" "}to <span className="font-medium text-foreground">{toLabel(end)}</span>
++                    {" "}({hours} {hours === 1 ? "hour" : "hours"})
++                  </>
++                ) : (
++                  <> — now tap your end time.</>
++                )}
++              </>
++            ) : (
++              "No time selected yet."
++            )}
++          </p>
++        </div>
++
++        {error && (
++          <p
++            role="alert"
++            className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
++          >
++            {error}
++          </p>
++        )}
++
++        <Button
++          type="submit"
++          size="lg"
++          disabled={submitting || hours <= 0 || !date}
++          className="w-full gap-2 sm:w-auto"
++        >
++          {submitting && <Loader2 className="size-4 animate-spin" />}
++          Book Now{hours > 0 ? ` — ${formatMoney(total)} total` : ""}
++        </Button>
++      </form>
++
++      <aside className="h-fit overflow-hidden rounded-2xl border border-border bg-card">
++        <div className="relative aspect-[16/9] w-full bg-muted">
++          <img
++            src={studio.imageUrl}
++            alt={studio.title}
++            className="h-full w-full object-cover"
++          />
++          <span className="absolute left-3 top-3 rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-white backdrop-blur">
++            {studio.category}
++          </span>
++        </div>
++        <div className="space-y-3 p-5">
++          <h2 className="text-lg font-semibold">{studio.title}</h2>
++          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
++            <MapPin className="size-4 shrink-0" /> {studio.location}
++          </p>
++          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
++            <Users className="size-4 shrink-0" /> Up to {studio.maxCapacity} people
++          </p>
++          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
++            <Star className="size-4 shrink-0 fill-current text-primary" />
++            {studio.reviewCount > 0
++              ? `${studio.rating.toFixed(1)} (${studio.reviewCount} reviews)`
++              : "New studio"}
++          </p>
++          <div className="space-y-2 border-t border-border pt-4 text-sm">
++            <div className="flex justify-between">
++              <span className="text-muted-foreground">Hourly rate</span>
++              <span>{formatMoney(studio.hourlyRate)}</span>
++            </div>
++            <div className="flex justify-between">
++              <span className="text-muted-foreground">Duration</span>
++              <span>{hours > 0 ? `${hours} hr` : "-"}</span>
++            </div>
++            <div className="flex justify-between border-t border-border pt-2 text-base font-semibold">
++              <span>Total price</span>
++              <span>{hours > 0 ? formatMoney(total) : "-"}</span>
++            </div>
++            {studio.securityDeposit > 0 && (
++              <p className="pt-1 text-xs text-muted-foreground">
++                A refundable security deposit of{" "}
++                {formatMoney(studio.securityDeposit)} is handled separately
++                by the host and is not included in the total.
++              </p>
++            )}
++            <p className="pt-1 text-xs text-muted-foreground">
++              Hosted by {studio.ownerName} ({studio.ownerEmail}). You will
++              not be charged until the host confirms your request.
++            </p>
++          </div>
++        </div>
++      </aside>
++    </div>
++  );
++}
+diff --git a/src/components/studios/edit-studio.tsx b/src/components/studios/edit-studio.tsx
+index 742d290..561240f 100644
+--- a/src/components/studios/edit-studio.tsx
++++ b/src/components/studios/edit-studio.tsx
+@@ -109,6 +109,9 @@ export function EditStudio({ studioId }: { studioId: string }) {
+     gallery: studio.gallery ?? [],
+     amenities: studio.amenities ?? [],
+     overview: studio.overview,
++    cancellationPolicy:
++      studio.cancellationPolicy ??
++      "Flexible — free cancellation up to 24 hours before the session",
+   };
+ 
+   return (
+diff --git a/src/components/studios/studio-card.tsx b/src/components/studios/studio-card.tsx
+index 64a0798..b148384 100644
+--- a/src/components/studios/studio-card.tsx
++++ b/src/components/studios/studio-card.tsx
+@@ -3,7 +3,7 @@
+ /* eslint-disable @next/next/no-img-element */
+ import { useState } from "react";
+ import Link from "next/link";
+-import { Aperture, Heart, MapPin, Star } from "lucide-react";
++import { Aperture, Heart, MapPin, ShieldCheck, Star } from "lucide-react";
+ import { buttonVariants } from "@/components/ui/button";
+ import { useWishlist } from "@/components/wishlist/wishlist-provider";
+ import { cn } from "@/lib/utils";
+@@ -56,6 +56,12 @@ export function StudioCard({ studio }: { studio: Studio }) {
+           <MapPin className="size-4 shrink-0" />
+           <span className="line-clamp-1">{studio.location}</span>
+         </p>
++        <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
++          <ShieldCheck className="size-3.5 shrink-0" />
++          <span className="line-clamp-1">
++            {studio.cancellationPolicy || "Flexible cancellation"}
++          </span>
++        </p>
+ 
+         <div className="mt-auto flex items-center justify-between gap-3 pt-5">
+           <p className="text-lg font-bold">
+@@ -69,7 +75,7 @@ export function StudioCard({ studio }: { studio: Studio }) {
+             href={`/studios/${studio._id}`}
+             className={cn(buttonVariants({ size: "sm" }))}
+           >
+-            View Details
++            View Studio
+           </Link>
+         </div>
+       </div>
+diff --git a/src/components/studios/studio-details.tsx b/src/components/studios/studio-details.tsx
+index 019f58e..cb511b5 100644
+--- a/src/components/studios/studio-details.tsx
++++ b/src/components/studios/studio-details.tsx
+@@ -3,9 +3,8 @@
+ import { useEffect, useState } from "react";
+ import Link from "next/link";
+ import { useRouter } from "next/navigation";
+-import { Check, Heart, MapPin, Star, Users, Wallet } from "lucide-react";
++import { Check, Heart, MapPin, ShieldCheck, Star, Users, Wallet } from "lucide-react";
+ import { toast } from "sonner";
+-import { BookingModal } from "@/components/studios/booking-modal";
+ import { ReviewsSection } from "@/components/studios/reviews-section";
+ import { StudioGallery } from "@/components/studios/studio-gallery";
+ import { Button, buttonVariants } from "@/components/ui/button";
+@@ -58,8 +57,6 @@ export function StudioDetails({ studioId }: { studioId: string }) {
+   const [studio, setStudio] = useState<Studio | null>(null);
+   const [error, setError] = useState<string | null>(null);
+   const [attempt, setAttempt] = useState(0);
+-  const [bookingOpen, setBookingOpen] = useState(false);
+-
+   useEffect(() => {
+     let ignore = false;
+ 
+@@ -87,11 +84,11 @@ export function StudioDetails({ studioId }: { studioId: string }) {
+     if (!user) {
+       toast.info("Please log in to book this studio.");
+       router.push(
+-        `/login?redirect=${encodeURIComponent(`/studios/${studioId}`)}`,
++        `/login?redirect=${encodeURIComponent(`/add-booking/${studioId}`)}`,
+       );
+       return;
+     }
+-    setBookingOpen(true);
++    router.push(`/add-booking/${studioId}`);
+   }
+ 
+   if (error && !studio) {
+@@ -236,6 +233,16 @@ export function StudioDetails({ studioId }: { studioId: string }) {
+                 </span>
+                 <span className="font-medium">{studio.maxCapacity} people</span>
+               </li>
++              <li className="flex items-start justify-between gap-3">
++                <span className="inline-flex items-center gap-2 text-muted-foreground">
++                  <ShieldCheck className="size-4 shrink-0" />
++                  Cancellation policy
++                </span>
++                <span className="text-right font-medium">
++                  {studio.cancellationPolicy ||
++                    "Flexible — free cancellation up to 24 hours before the session"}
++                </span>
++              </li>
+             </ul>
+ 
+             <Button
+@@ -245,7 +252,7 @@ export function StudioDetails({ studioId }: { studioId: string }) {
+               disabled={isOwner}
+               onClick={handleBook}
+             >
+-              {isOwner ? "This is your studio" : "Book Workspace Now"}
++              {isOwner ? "This is your studio" : "Book Now"}
+             </Button>
+             <p className="mt-3 text-center text-xs text-muted-foreground">
+               You will not be charged until the host confirms your request.
+@@ -253,12 +260,6 @@ export function StudioDetails({ studioId }: { studioId: string }) {
+           </div>
+         </aside>
+       </div>
+-
+-      <BookingModal
+-        open={bookingOpen}
+-        onOpenChange={setBookingOpen}
+-        studio={studio}
+-      />
+     </WishlistProvider>
+   );
+ }
+\ No newline at end of file
+diff --git a/src/components/studios/studio-form.tsx b/src/components/studios/studio-form.tsx
+index f23eeff..6f565cf 100644
+--- a/src/components/studios/studio-form.tsx
++++ b/src/components/studios/studio-form.tsx
+@@ -34,8 +34,17 @@ export interface StudioFormValues {
+   gallery: string[];
+   amenities: string[];
+   overview: string;
++  cancellationPolicy: string;
+ }
+ 
++export const CANCELLATION_POLICIES = [
++  "Flexible — free cancellation up to 24 hours before the session",
++  "Moderate — free cancellation up to 3 days before the session",
++  "Strict — free cancellation up to 7 days before the session, then 50% refund",
++] as const;
++
++export const DEFAULT_CANCELLATION_POLICY = CANCELLATION_POLICIES[0];
++
+ const emptyValues: StudioFormValues = {
+   title: "",
+   category: STUDIO_CATEGORIES[0],
+@@ -47,6 +56,7 @@ const emptyValues: StudioFormValues = {
+   gallery: [],
+   amenities: [],
+   overview: "",
++  cancellationPolicy: DEFAULT_CANCELLATION_POLICY,
+ };
+ 
+ const SUGGESTED_AMENITIES = [
+@@ -201,6 +211,7 @@ export function StudioForm({
+       gallery: values.gallery,
+       amenities: values.amenities,
+       overview: values.overview.trim(),
++      cancellationPolicy: values.cancellationPolicy,
+     };
+ 
+     async function save() {
+@@ -299,6 +310,27 @@ export function StudioForm({
+           )}
+         </div>
+ 
++        <div className="space-y-2">
++          <Label htmlFor="cancellationPolicy">Cancellation policy</Label>
++          <Select
++            value={values.cancellationPolicy}
++            onValueChange={(value) =>
++              setField("cancellationPolicy", value ?? DEFAULT_CANCELLATION_POLICY)
++            }
++          >
++            <SelectTrigger id="cancellationPolicy" className="w-full">
++              <SelectValue placeholder="Choose a cancellation policy" />
++            </SelectTrigger>
++            <SelectContent>
++              {CANCELLATION_POLICIES.map((policy) => (
++                <SelectItem key={policy} value={policy}>
++                  {policy}
++                </SelectItem>
++              ))}
++            </SelectContent>
++          </Select>
++        </div>
++
+         <div className="space-y-2">
+           <Label htmlFor="location">Location / address</Label>
+           <Input
+diff --git a/src/types/studio.ts b/src/types/studio.ts
+index 2b58635..a8fa65c 100644
+--- a/src/types/studio.ts
++++ b/src/types/studio.ts
+@@ -20,6 +20,7 @@ export interface Studio {
+   gallery?: string[];
+   amenities: string[];
+   overview: string;
++  cancellationPolicy?: string;
+   ownerEmail: string;
+   ownerName: string;
+   rating: number;

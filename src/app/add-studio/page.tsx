@@ -3,7 +3,7 @@ import { RequireAuth } from "@/components/auth/require-auth";
 import { StudioForm } from "@/components/studios/studio-form";
 
 export const metadata: Metadata = {
-  title: "Add New Studio | StudioSpace",
+  title: "Add New Studio",
 };
 
 export default function AddStudioPage() {

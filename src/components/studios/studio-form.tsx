@@ -34,7 +34,16 @@ export interface StudioFormValues {
   gallery: string[];
   amenities: string[];
   overview: string;
+  cancellationPolicy: string;
 }
+
+export const CANCELLATION_POLICIES = [
+  "Flexible — free cancellation up to 24 hours before the session",
+  "Moderate — free cancellation up to 3 days before the session",
+  "Strict — free cancellation up to 7 days before the session, then 50% refund",
+] as const;
+
+export const DEFAULT_CANCELLATION_POLICY = CANCELLATION_POLICIES[0];
 
 const emptyValues: StudioFormValues = {
   title: "",
@@ -47,6 +56,7 @@ const emptyValues: StudioFormValues = {
   gallery: [],
   amenities: [],
   overview: "",
+  cancellationPolicy: DEFAULT_CANCELLATION_POLICY,
 };
 
 const SUGGESTED_AMENITIES = [
@@ -201,6 +211,7 @@ export function StudioForm({
       gallery: values.gallery,
       amenities: values.amenities,
       overview: values.overview.trim(),
+      cancellationPolicy: values.cancellationPolicy,
     };
 
     async function save() {
@@ -297,6 +308,27 @@ export function StudioForm({
           {errors.category && (
             <p className="text-sm text-destructive">{errors.category}</p>
           )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="cancellationPolicy">Cancellation policy</Label>
+          <Select
+            value={values.cancellationPolicy}
+            onValueChange={(value) =>
+              setField("cancellationPolicy", value ?? DEFAULT_CANCELLATION_POLICY)
+            }
+          >
+            <SelectTrigger id="cancellationPolicy" className="w-full">
+              <SelectValue placeholder="Choose a cancellation policy" />
+            </SelectTrigger>
+            <SelectContent>
+              {CANCELLATION_POLICIES.map((policy) => (
+                <SelectItem key={policy} value={policy}>
+                  {policy}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">

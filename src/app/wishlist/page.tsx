@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { SavedStudios } from "@/components/wishlist/saved-studios";
 
 export const metadata: Metadata = {
-  title: "Saved Studios | StudioSpace",
+  title: "Saved Studios",
 };
 
 export default function WishlistPage() {

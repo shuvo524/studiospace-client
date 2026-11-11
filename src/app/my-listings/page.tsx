@@ -3,7 +3,7 @@ import { RequireAuth } from "@/components/auth/require-auth";
 import { MyListings } from "@/components/listings/my-listings";
 
 export const metadata: Metadata = {
-  title: "My Studio Listings | StudioSpace",
+  title: "My Studio Listings",
 };
 
 export default function MyListingsPage() {

@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, Heart, MapPin, Star, Users, Wallet } from "lucide-react";
+import { Check, Heart, MapPin, ShieldCheck, Star, Users, Wallet } from "lucide-react";
 import { toast } from "sonner";
-import { BookingModal } from "@/components/studios/booking-modal";
 import { ReviewsSection } from "@/components/studios/reviews-section";
 import { StudioGallery } from "@/components/studios/studio-gallery";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -58,8 +57,6 @@ export function StudioDetails({ studioId }: { studioId: string }) {
   const [studio, setStudio] = useState<Studio | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
-  const [bookingOpen, setBookingOpen] = useState(false);
-
   useEffect(() => {
     let ignore = false;
 
@@ -87,11 +84,11 @@ export function StudioDetails({ studioId }: { studioId: string }) {
     if (!user) {
       toast.info("Please log in to book this studio.");
       router.push(
-        `/login?redirect=${encodeURIComponent(`/studios/${studioId}`)}`,
+        `/login?redirect=${encodeURIComponent(`/add-booking/${studioId}`)}`,
       );
       return;
     }
-    setBookingOpen(true);
+    router.push(`/add-booking/${studioId}`);
   }
 
   if (error && !studio) {
@@ -236,6 +233,16 @@ export function StudioDetails({ studioId }: { studioId: string }) {
                 </span>
                 <span className="font-medium">{studio.maxCapacity} people</span>
               </li>
+              <li className="flex items-start justify-between gap-3">
+                <span className="inline-flex items-center gap-2 text-muted-foreground">
+                  <ShieldCheck className="size-4 shrink-0" />
+                  Cancellation policy
+                </span>
+                <span className="text-right font-medium">
+                  {studio.cancellationPolicy ||
+                    "Flexible — free cancellation up to 24 hours before the session"}
+                </span>
+              </li>
             </ul>
 
             <Button
@@ -245,7 +252,7 @@ export function StudioDetails({ studioId }: { studioId: string }) {
               disabled={isOwner}
               onClick={handleBook}
             >
-              {isOwner ? "This is your studio" : "Book Workspace Now"}
+              {isOwner ? "This is your studio" : "Book Now"}
             </Button>
             <p className="mt-3 text-center text-xs text-muted-foreground">
               You will not be charged until the host confirms your request.
@@ -253,12 +260,6 @@ export function StudioDetails({ studioId }: { studioId: string }) {
           </div>
         </aside>
       </div>
-
-      <BookingModal
-        open={bookingOpen}
-        onOpenChange={setBookingOpen}
-        studio={studio}
-      />
     </WishlistProvider>
   );
 }

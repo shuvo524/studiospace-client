@@ -5,7 +5,7 @@ import { ExploreStudios } from "@/components/studios/explore-studios";
 import { StudioCardSkeleton } from "@/components/studios/studio-card-skeleton";
 
 export const metadata: Metadata = {
-  title: "Explore Studios | StudioSpace",
+  title: "Explore Studios",
 };
 
 export default function StudiosPage() {

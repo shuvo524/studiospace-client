@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState } from "react";
 import Link from "next/link";
-import { Aperture, Heart, MapPin, Star } from "lucide-react";
+import { Aperture, Heart, MapPin, ShieldCheck, Star } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { useWishlist } from "@/components/wishlist/wishlist-provider";
 import { cn } from "@/lib/utils";
@@ -56,6 +56,12 @@ export function StudioCard({ studio }: { studio: Studio }) {
           <MapPin className="size-4 shrink-0" />
           <span className="line-clamp-1">{studio.location}</span>
         </p>
+        <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <ShieldCheck className="size-3.5 shrink-0" />
+          <span className="line-clamp-1">
+            {studio.cancellationPolicy || "Flexible cancellation"}
+          </span>
+        </p>
 
         <div className="mt-auto flex items-center justify-between gap-3 pt-5">
           <p className="text-lg font-bold">
@@ -69,7 +75,7 @@ export function StudioCard({ studio }: { studio: Studio }) {
             href={`/studios/${studio._id}`}
             className={cn(buttonVariants({ size: "sm" }))}
           >
-            View Details
+            View Studio
           </Link>
         </div>
       </div>

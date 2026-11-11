@@ -5,7 +5,7 @@ import { RequireAuth } from "@/components/auth/require-auth";
 import { EditStudio } from "@/components/studios/edit-studio";
 
 export const metadata: Metadata = {
-  title: "Update Studio | StudioSpace",
+  title: "Update Studio",
 };
 
 function GuardFallback() {
