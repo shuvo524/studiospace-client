@@ -25,7 +25,7 @@ function GalleryImage({ src, alt }: { src: string; alt: string }) {
       src={src}
       alt={alt}
       onError={() => setFailed(true)}
-      className="h-full w-full object-cover"
+      className="h-full w-full max-w-full object-cover"
     />
   );
 }
@@ -40,7 +40,7 @@ export function StudioGallery({
   const hasMany = images.length > 1;
 
   return (
-    <div className="aspect-[16/10] w-full overflow-hidden rounded-2xl border border-border bg-muted">
+    <div className="aspect-[16/10] w-full min-w-0 overflow-hidden rounded-2xl border border-border bg-muted">
       <Swiper
         modules={[Navigation, Pagination, Keyboard]}
         navigation={hasMany}

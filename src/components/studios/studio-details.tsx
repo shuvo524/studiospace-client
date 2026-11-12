@@ -39,8 +39,8 @@ function SaveButton({ studioId }: { studioId: string }) {
 
 function DetailsSkeleton() {
   return (
-    <div className="grid animate-pulse gap-8 lg:grid-cols-3">
-      <div className="space-y-6 lg:col-span-2">
+    <div className="grid grid-cols-1 animate-pulse gap-8 lg:grid-cols-3">
+      <div className="min-w-0 space-y-6 lg:col-span-2">
         <div className="aspect-[16/10] rounded-2xl bg-muted" />
         <div className="h-8 w-2/3 rounded bg-muted" />
         <div className="h-4 w-1/3 rounded bg-muted" />
@@ -128,8 +128,8 @@ export function StudioDetails({ studioId }: { studioId: string }) {
 
   return (
     <WishlistProvider>
-      <div className="grid gap-8 lg:grid-cols-3">
-        <div className="space-y-10 lg:col-span-2">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="min-w-0 space-y-10 lg:col-span-2">
           <StudioGallery images={images} title={studio.title} />
 
           <div>
@@ -206,7 +206,7 @@ export function StudioDetails({ studioId }: { studioId: string }) {
           <ReviewsSection studioId={studio._id} onChanged={reload} />
         </div>
 
-        <aside className="lg:sticky lg:top-24 lg:self-start">
+        <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm">
             <p className="text-3xl font-bold">
               {formatMoney(studio.hourlyRate)}
